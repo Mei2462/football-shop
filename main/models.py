@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 class Product(models.Model):
@@ -8,6 +9,7 @@ class Product(models.Model):
         ("accessories", "Accessories"),
     ]
     
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     price = models.IntegerField(default=0)
     description = models.TextField(blank=True, null=True)
@@ -17,4 +19,10 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.name} - ({self.category}) : Rp{self.price:,}" + (" [Featured]" if self.is_featured else "")
+        return self.name
+    
+    def get_price_display(self):
+        return f"Rp {self.price:,}"
+
+    def get_stock_display(self):
+        return f"{self.stock} pcs"
