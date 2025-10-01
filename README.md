@@ -1,85 +1,53 @@
-Pertanyaan Tugas 4: Implementasi Autentikasi, Session, dan Cookies pada Django
+Pertanyaan Tugas 5: Desain Web menggunakan HTML, CSS dan Framework CSS
 
 Pertanyaan:
-1. Apa itu Django AuthenticationForm? Jelaskan juga kelebihan dan kekurangannya.
--> AuthenticationForm adalah form bawaan Django yang digunakan untuk mengelola proses login pengguna dengan memverifikasi akun dan password, melihat apakah pengguna aktif, dan memberikan pesan error jika kredensial tidak valid.
+1. Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!
+-> Ketika beberapa CSS selector untuk suatu elemen HTML yang sama,  maka CSS selector akan melakukan pengurutan prioritas berdasarkan cascade dengan urutan sbb:
+1. Melihat apakah ada deklarasi !important, yang kemudian akan mengalahkan deklarasi normal (tanpa !important). Namun, jika pada dua aturan sama-sama !important, maka urutan prioritas dilanjutkan ke specificty & urutan sumber.
+2. Kemudian ada asal & layer, dimana author styles pada CSS kita akan mengalahkan user agent (default browser). Jika elemen HTML menggunakan @layer dalam kategori yang sama, maka layer yang terakhirlah yang memiliki prioritas paling tinggi (bottom to top). 
+3. Selanjutnya ada specificity (tingkat kekhususan selector) dengan urutan prioritas inline style -> ID selector -> class/attribute/pseudoclass -> element/pseudoelement. 
+4. Jika semua poin di atas sama, maka aturan urutan terakhir yang digunakan adalah berdasarkan urutan kemunculan (source order). Pada aturan ini, yang muncul terakhir pada stylesheetlah yang diprioritaskan. 
 
-Keuntungan dari AuthenticationForm adalah sbb:
-1. Sudah terintegrasi dengan sistem autentikasi Django secara langsung.
-2. Termasuk validasi keamanan, seperti cek pengguna aktif dan hashing password.
-3. Mudah digunakan dan tidak memerlukan pembuatan formulir manual.
-4. Bisa dipanjangkan untuk menambahkan field tambahan, seperti "Remember Me".
+Beberapa pengecualian untuk pengurutan priotitas: 
+- :not(...) tidak menambah specificity; yang di dalamnya yang dihitung.
+- :is(...) menggunakan specificity terbesar dari daftar di dalamnya.
+- :where(...) selalu specificity 0, jadi ideal untuk “utilitas” yang mudah dioverride.
+- !important dalam stylesheet bisa mengalahkan inline style biasa (tanpa !important).
 
-Kekurangan dari AuthenticationForm adalah sbb:
-1. Desain sederhana dan mungkin tidak fleksibel untuk UI/UX kontemporer.
-2. Harus digunakan dalam konteks yang tepat, seperti ketika request.POST disertakan.
-3. Secara default tidak mendukung captcha atau autentikasi 2-faktor.
+2. Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design, serta jelaskan mengapa!
+-> Karena web dapat diakses melalui berbagai ukuran dan densitas pixel seperti melalui ponsel, tablet, laptop, dan desktop, tata letak yang responsif sangat penting untuk meningkatkan keterbacaan karena tidak perlu selalu pinch-zoom. Selain itu, SEO seperti Google memprioritaskan situs yang ramah ponsel. Pada sisi developer pun dapat mempertahankan basis kode yang konsisten untuk semua perangkat dan membuat akses ke 1 situs yang sama.  
 
-2. Apa perbedaan antara autentikasi dan otorisasi? Bagaiamana Django mengimplementasikan kedua konsep tersebut?
--> Autentikasi adalah proses yang digunakan untuk memastikan identitas pengguna, biasanya menggunakan nama pengguna dan kata sandi. 
+GitHub, Youtube, dan Airbnb adalah beberapa contoh yang sudah menggunakan responsive design. Web-web tersebut menggunakan layout fluida, grid/flex adaptif, breakpoint untuk navigasi & konten untuk memastikan konten mereka karena kelebihan yang telah disebutkan di atas. Sehingga website tetap dapat diakses melalu berbagai device (mobile, tab, maupun desktop).
 
-Django melakukan autentikasi dengan cara berikut:
-1. Djago.Contribution.Auth
-2. Form berupa AuthenticationForm
-3. View berupa LoginView, LogoutView
-4. Fungsi berupa authenticate(), login(), logout()
+Sebaliknya, masih ada Sebagian website juga yang belum menerapkan responsive design seperti Tempo.co dan SIAK NG menggunakan lebar tetap tanpa media query sehingga tampilannya yang terlalu zoom-in pada ponsel. Ketika user zoom-out, maka tampilan font menjadi terlalu kecil, tombol sulit ditekan, dan kolom yang tidak disesuaikan dengan lebar perangkat membuat user perlu untuk scroll horizontal untuk membaca seluruh tulisan pada 1 baris.
 
-Contoh autentikasi pada Django adalah pada saat user melakukan login pada suatu website dan klik button login, browser akan mengirimkan data login ke server Django melalui metode POST. Dan pada Django akan memproses form login tersebut menggunakan AuthenticationForm yang secara otomatis akan cek username dan password, serta apakah user tersebut aktif/terblokir. Setelah itu, Django akan memanggil form.is_valid() untuk memastikan kredensial yang benar sekaligus mengautentikasi user tsb. Jika sudah berhasil, maka Django akan menyimpan data user ke dalam session hingga user tersebut logout dan session tersebut akan dihapus juga.
+3. Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut!
+-> Dalam box model CSS, margin adalah ruang transparan di luar border. Margin ini memisahkan elemen dengan elemen lainnya, dan pada flow standard margin vertical dapat saling "collapse". Sedangkan border adalah garis yang membatasi antara margin dan padding. Dan terakhir padding adalah ruang di dalam margin yang membuat konten memiliki ruang untuk "napas" dari konten. Contohnya adalah latar belakang atau elemen latar belakang, yang dapat meluas di area padding. Sehingga, jika ditulis urutannya dari bagian terluar adalah [ margin ]  →  [ border ]  →  [ padding ]  →  [ content ].
 
-Otorisasi adalah proses di mana, setelah autentikasi, pengguna diberi akses ke fitur tertentu.
+Untuk mengimplementasikan margin, border, dan padding adalah dengan urutan sbb:
+margin: 16px; //berlaku semua sisi
+padding: 12px 24px; //vertikal 12, horizontal 24
+border: 2px solid #333; //ketebalan, dan warna
 
-Django melakukan otorisasi dengan cara berikut:
-1. Sistem permission seperti add, change, delete, view.
-2. Dekorator berupa @login_required dan @permission_required.
-3. Middleware berupa AuthenticationMiddleware.
+Namun, implementasi dari margin, border, dan padding  tidak terbatas pada pixel saja, namun bisa ditentukan dengan satuan-satuan lainnya juga.
 
-Contoh otorisasi pada Django adalah pada saat user yang sedang aktif ingin menggunakan suatu fitur yang telah diatur berdasarkan role seperti dosen yang ingin mengakses fitur "Ubah Nilai". Setelah login, akun dosen tersebut akan diidentifikasi oleh middleware AuthenticationMiddleware yang akan mengenali user yang sedang login melalui session, melekatkan objek request.user ke setiap permintaan, serta menyediakan akses ke informasi user di semua bagian aplikasi. Sehingga Django akan mengetahui bahwa dosen memiliki permission ke fitur apa saja, dan bisa mengakses view apa saja.
+4. Jelaskan konsep flex box dan grid layout beserta kegunaannya!
+->
+Flexbox adalah sistem layout satu dimensi yang mengatur item sepanjang satu sumbu (row atau column). Properti inti dari container flexbox seperti display adalah flex; flex-direction; flex-wrap; justify-content; align-items; gap. Adapun properti item pada flexbox berupa
+flex adalah <grow> <shrink> <basis>; align-self; order. Penggunaan flexbox ini banyak ditemukan pada cocok untuk navbar, baris kartu, alignment tengah, dan komponen yang mengalir linear.
 
-3. Apa saja kelebihan dan kekurangan session dan cookies dalam konteks menyimpan state di aplikasi web?
--> Cookie adalah istilah yang digunakan untuk menggambarkan data kecil yang disimpan browser pengguna.
+Grid (two‑dimensional layout) berfokus pada sistem dua dimensi yang secara bersamaan mengatur baris dan kolom. Sehingga dengan grid akan memungkinkan mendeklarasikan track (grid; grid-template-columns; grid-template-rows;), area bernama (grid-template-areas), dan grid responsif (auto-fit/auto-fill, minmax) yang ideal untuk layout halaman, dashboard, galeri, tabel kartu, dan kombinasi area (header/main/aside/footer).
 
-Kelebihan:
-1. Bisa dibaca secara langsung oleh browser (misalnya untuk memilih tema).
-2. Bisa digunakan lintas domain dan request setelah dikonfigurasi.
+Lantas kapan pakai Flex vs Grid? Idealnya kita menggunakan Flexbox untuk aliran linear satu arah dan penyusunan komponen kecil. Sedangkan Grid untuk komposisi dua dimensi yang membutuhkan kontrol area yang lebih luas dan relasi baris‑kolom. Namun keduanya juga sering dikombinasikan dalam satu interface karena dapat saling melengkapi satu sama lain.
 
-Kekurangan:
-1. Dapat dimodifikasi oleh pengguna sehingga tidak aman untuk data sensitif.
-2. Ukurannya yang terbatas yaitu 4 KB.
-3. Memerlukan perlindungan tambahan (HttpOnly, Secure, dan SameSite).
-
-Sessions adalah data state yang disimpan di server dan cookie yang hanya mengandung ID sesi (sessionid).
-
-Kelebihan:
-1. Lebih aman karena data tidak disimpan di client.
-2. Memiliki kemampuan untuk menyimpan volume data yang lebih besar dan kompleks.
-
-Kekurangan:
-1. Bergantung pada memori server.
-2. Perlu manajemen penyimpanan yang besar jika ada banyak pengguna.
-
-4. Apakah penggunaan cookies aman secara default dalam pengembangan web, atau apakah ada risiko potensial yang harus diwaspadai? Bagaimana Django menangani hal tersebut?
--> Cookies tidak sepenuhnya aman secara default. Berikut adalah risiko potensial yang perlu diwaspadai:
-1. Serangan XSS (Cross-site Scripting) dapat mencuri cookie jika tidak ditandai sebagai HttpOnly.
-2. Jika digunakan tanpa perlindungan token dapat terjadi CSRF (Request Forgery Cross-Site).
-3. Jika tidak dienkripsi atau ditandatangani, user dapat mengubah cookie.
-
-Untuk menangani risiko-risiko ini, Django melakukan:
-1. Menandai session cookie sebagai aman dengan SESSION_COOKIE_HTTPONLY = True (default), SESSION_COOKIE_SECURE = True (HTTPS), dan CSRF_COOKIE_SECURE = True.
-2. Menandai CSRF token dalam setiap form POST dengan {% csrf_token %} dalam template serta CsrfViewMiddleware yang memvalidasi token.
-3. Menandatangani cookie dengan secret key dan menolak cookie jika telah dimodifikasi.
-
-5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
--> 1.	Langkah pertama yang saya lakukan adalah menambahkan fungsi registrasi, login dan logout di file views.py pada direktori main. Saya menambahkan tiga fungsi baru, yaitu register yang berfungsi untuk mendaftarkan akun user baru menggunakan UserCreationForm(form bawaan Django untuk membuat akun user baru dengan validasi otomatis), login_user yang berfungsi untuk autentikasi data dari user menggunakan AuthenticationForm (form bawaan Django untuk autentikasi user) agar bisa mengakses fitur tertentu pada web page dan logout_user yang berfungsi untuk mengarahkan user untuk kembali ke halaman login.
-2.	Saya juga menambahkan decorator login_required diatas fungsi-fungsi pada file views.py yang hanya boleh diakses oleh user yang sudah login (yaitu pada fungsi show_main dan show_product), jika user belum login dan mencoba untuk mengakses fitur web page yang direstriksi diatas, maka akan diarahkan langsung ke halaman login.
-3.	Setelah itu, saya menambahkan route URL fungsi-fungsi diatas pada file urls.py yang berada dalam direktori main. Saya memastikan melakukan import fungsi register, login_user, dan logout_user dari file views.py dan setelahnya menambahkan url pattern dari masing-masing fungsi tersebut kedalam list url patterns.
-4.	Saya menambahkan file yang bernama login.html dan register.html pada direktori templates dalam direktori main. Pada file register.html berfungsi sebagai template untuk menampilkan form pendaftaran (UserCreationForm) user baru dan menerima input data dari user dalam pembuatan akun. Sedangkan pada file login.html berfungsi sebagai template halaman login pengguna yang sudah terdaftar sebelumnya menggunakan form dari AuthenticationForm dan menyediakan link yang mengarahkan pada halaman registrasi jika user tidak memiliki akun. Pada file main.html juga ditambahkan tampilan button logout user.
-5.	Kemudian, saya melakukan import yang diperlukan pada file views.py untuk menerapkan cookies (last_login) yang terdiri dari import datetime untuk mendapatkan waktu saat itu, HttpResponseRedirect untuk modifikasi respons HTTP (menambahkan cookie dan redirect ke URL tujuan) dan reverse untuk mendapatkan URL dari fitur dalam view yang terdaftar dalam url pattern di urls.py. Pada bagian fungsi show_main, login_user dan logout_user dilakukan beberapa penambahan untuk penerapan cookies. Pada fungsi show_main bagian context, ditambahkan baris kode yang mengambil nilai cookie (last_login) dari browser, jika tidak ada akan dikembalikan nilai ‘Never’.Fungsi login_user ditambahkan baris kode yang dapat menyimpan cookie pada sisi browser dengan nilai waktu login pada saat itu setelah redirect ke halaman show_main, sedangkan pada fungsi logout_user ditambahkan baris kode yang akan menghapus cookie (last_login) setelah redirect ke halaman login kembali.
-6.	Kembali pada file main.html, saya menambahkan potongan kode untuk menampilkan waktu terakhir sesi login user tersebut.
-7.	Kemudian, pada file models.py dalam direktori main dilakukan import User bawaan dari Django yang dimana merupakan akun user yang dibuat sebelumnya. Saya menambahkan atribut user dengan model relasi many-to-one (menghubungkan model yang dibuat dengan user bawaan Django) yang dalam kasus ini menghubungkan produk-produk dengan satu aku penjual.
-8.	Tak lupa, setelah menambahkan model saya membuat file migrasi model dan menjalankan migrasi model dengan perintah python manage.py makemigrations dan python manage.py migrate.
-9.	Setelah melakukan migrasi, kembali ke file views.py, saya melakukan penambahan beberapa baris kode di fungsi create_product yang bertujuan untuk menyimpan objek model tidak langsung ke database sehingga memungkinkan beberapa penyesuaian secara manual sebelum menyimpan, menetapkan user yang mebuat produk dan akhirnya baru disimpan ke database setelah menambahkan user.
-10.	Untuk menampilkan informasi username dari user yang sedang login dan fitur filter menampilkan semua produk dan menampilkan hanya produk dari user yang sedang login tersebut, saya melakukan penambahan pada file views.py di fungsi show_main, pada bagian context yang akan menampilkan nama, saya menggantinya menjadi data username yang dinamis. Saya juga menambahkan baris kode yang bertujuan untuk melakukan filter menampilkan produk berdasarkan user dan filter yang menampilkan semua produk yang ada.
-11.	Kemudian, saya menambahkan baris kode yang berfungsi untuk menampilkan button filter (menampilkan semua produk dan menampilkan produk penjual yang sedang login) pada file main.html dan saya juga menambahkan baris kode yang akan menampilkan nama penjual yang membuat katalog produk tersebut pada halaman detail produk yang dimana akan menampilkan penjual dengan nama ‘Anonymous’ jika tidak terdapat informasi penjual yang membuat katalog produk tersebut pada file product_detail.html.
-12.	Setelah semua ditambahkan, saya menjalankan server dan membuka link http://localhost:8000/ pada browser untuk memastikan tampilan sesuai dengan apa yang diinginkan.
-13.	Untuk memastikan semua fitur berjalan dengan baik, pada server lokal saya membuat dua akun yang berbeda dan masing-masing saya tambahkan tiga jenis dummy data yang berbeda.
-14.	Setelah semua dipastikan berjalan dengan baik, langkah terakhir adalah melakukan add, commit dan push ke GitHub.
+5. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial)!
+-> 1. Langkah pertama yang saya lakukan adalah menambahkan fungsi edit dan hapus produk di file views.py pada direktori main. Saya menambahkan tiga fungsi baru, yaitu edit_product yang akan menampilkan dan memproses form edit produk dari data produk yang sudah ada dan fungsi delete_product yang akan menghapus produk dari database berdasarkan id dari produk tersebut.
+2. Setelah itu, saya menambahkan route URL fungsi-fungsi diatas pada file urls.py yang berada dalam direktori main. Saya memastikan melakukan import fungsi edit_product dan delete_product dari file views.py dan setelahnya menambahkan url pattern dari masing-masing fungsi tersebut kedalam list url patterns.
+3.	Saya menambahkan file yang bernama edit_product.html pada direktori templates dalam direktori main. Pada file edit_product.html berfungsi sebagai template untuk menampilkan form edit produk yang sudah terisi dengan data sebelumnya sehingga user dapat memperbarui data produk dan menyimpan data produk yang baru ke dalam database.
+4.	Kemudian, saya melakukan modifikasi di file main.html pada direktori templates yang berada dalam direktori main. modifikasi yang saya pada main.html adalah memunculkan tombol edit dan delete pada setiap produk yang terhubung dengan user yang membuat produk tersebut.
+5. Saya membuka file base.html dalam direktori templates yang berada pada direktori root project, saya menambahkan script cdn tailwind pada bagian head html yang berfungsi untuk menyiapkan metadata dan style pada html menggunakan css framework tailwind.
+6. Pertama-tama saya membangun navbar yang kemudian dapat diinclude ke halaman lain. Pada direktori templates/navbar/html saya membangun komponen ini dengan Tailwind yang membuat posisi navbar ini fixed di atas dan adanya hamburger menu pada tampilan mobile.
+7. Untuk merapikan tampilan list produk, saya membuat HTML card_product untuk styling dan menambahkan empty state jika produk tersebut tidak memiliki thumbnail sehingga menampilkan gambar default pada direktori file yang telah ditentukan.
+8. Setelah itu, saya membuat styling pada html template dengan detail-detail tambahan seperti error handling pada login, register, create product. Pada halaman main dan news detail juga saya tambahkan styling tambahan selain dari kelas tutorial sehingga dapat membuat tampilan menjadi lebih menarik. Selain itu, berdasarkan instruksi soal saya juga menambahkan halaman baru untuk edit product yang mirip dengan create product dengan menggunakan forms, namun perbedaannya adalah telah fill in field yang telah diisi pada saat create product saja. 
+9.	Setelah semua ditambahkan, saya menjalankan server dan membuka link http://localhost:8000/ pada browser untuk memastikan tampilan sesuai dengan apa yang diinginkan dan function-function berjalan dengan sebagaimana mestinya.
+10.	Setelah semua dipastikan berjalan dengan baik, langkah terakhir adalah melakukan add, commit dan push ke GitHub.

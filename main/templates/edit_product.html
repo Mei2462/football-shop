@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block meta %}
-<title>Create Product - main</title>
+<title>Edit Product - main</title>
 {% endblock meta %}
 
 {% block content %}
@@ -20,23 +22,24 @@
     <!-- Page Title -->
     <div class="mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-        Add New Product
+        Edit Product
       </h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Fill out the form below to add a new product to your football shop.</p>
+      <p class="mt-1 text-gray-600 dark:text-gray-400">Update your product information.</p>
     </div>
 
     <!-- Form Card -->
     <div class="relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/70 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-800 overflow-hidden">
-      <!-- subtle top gradient -->
+      <!-- top accent -->
       <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"></div>
 
-      <form method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-8">
+      <form method="POST" class="p-6 sm:p-8 space-y-8" enctype="multipart/form-data" id="edit-product-form">
         {% csrf_token %}
 
-        <!-- kelompokkan field name, price, stock, dll di grid -->
-        <div class="grid grid-cols-1 gap-6">
+        <!-- Grid fields  -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {% for field in form %}
-            <div>
+            {% with fname=field.name %}
+            <div class="{% if fname == 'name' or fname == 'price' or fname == 'stock' or fname == 'category' %}sm:col-span-1{% else %}sm:col-span-2{% endif %}">
               <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ field.label }}
                 {% if field.field.required %}
@@ -44,10 +47,8 @@
                 {% endif %}
               </label>
 
-              <!-- field wrapper (for error styles) -->
               <div class="relative">
                 {{ field }}
-                <!-- error ring handled  -->
                 {% if field.help_text %}
                   <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
                 {% endif %}
@@ -57,16 +58,8 @@
                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
               {% endfor %}
             </div>
+            {% endwith %}
           {% endfor %}
-        </div>
-
-          <div class="mt-4 flex items-center gap-4">
-            <img id="image-preview" src="" alt="Preview" class="hidden h-24 w-24 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-700">
-            <button type="button" id="remove-preview"
-                    class="hidden text-xs rounded-md border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-              Remove
-            </button>
-          </div>
         </div>
 
         <!-- Divider -->
@@ -74,40 +67,44 @@
 
         <!-- Actions -->
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <button type="submit"
+          <a href="{% url 'main:show_main' %}"
+             class="order-2 sm:order-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium transition">
+            Cancel
+          </a>
+          <button type="submit" id="submit-btn"
                   class="order-1 sm:order-2 inline-flex items-center justify-center gap-2 flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 dark:focus:ring-offset-gray-900 transition">
-            <!-- plus icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 -ml-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2h-5v5a1 1 0 1 1-2 0v-5H4a1 1 0 1 1 0-2h5V4a1 1 0 0 1 1-1Z"/></svg>
-            Add Product
+            <!-- save icon -->
+            <svg id="btn-spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+            </svg>
+            <span id="btn-text">Update Product</span>
           </button>
         </div>
       </form>
     </div>
 
-    <!-- Small note -->
     <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
       Fields marked <span class="text-red-500">*</span> are required.
     </p>
   </div>
 </div>
 
-<!-- input/select/textarea + drag&drop + preview -->
+<!-- styling input + ring error + UX tombol -->
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    //auto-styling untuk tiap field tanpa widget_tweaks
+    // Auto-styling kontrol form 
     const baseInput =
       'w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 ' +
       'focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed';
-    const textareas = document.querySelectorAll('textarea');
-    const inputs = document.querySelectorAll('input:not([type=file]):not([type=checkbox]):not([type=radio])');
-    const selects = document.querySelectorAll('select');
-    const files = document.querySelectorAll('input[type=file]');
+    document.querySelectorAll('input:not([type=file]):not([type=checkbox]):not([type=radio])')
+      .forEach(el => el.classList.add(...baseInput.split(' ')));
+    document.querySelectorAll('textarea')
+      .forEach(el => el.classList.add(...(baseInput + ' min-h-[120px]').split(' ')));
+    document.querySelectorAll('select')
+      .forEach(el => el.classList.add(...(baseInput + ' pr-8').split(' ')));
 
-    inputs.forEach(el => el.classList.add(...baseInput.split(' ')));
-    textareas.forEach(el => el.classList.add(...(baseInput + ' min-h-[120px]').split(' ')));
-    selects.forEach(el => el.classList.add(...(baseInput + ' pr-8').split(' ')));
-
-    // Error ring untuk field yang punya error
+    // Ring merah bila ada error text di bawah field
     document.querySelectorAll('.text-red-600, .dark\\:text-red-400').forEach(err => {
       const wrapper = err.closest('div')?.previousElementSibling || null;
       if (!wrapper) return;
@@ -115,9 +112,16 @@
       if (control) control.classList.add('border-red-500', 'focus:ring-red-500');
     });
 
-    //field price prefix Rp
-    const priceInput = document.querySelector('input[name=price]');
-    if (priceInput && !priceInput.placeholder) priceInput.placeholder = 'Rp 0';
+    // Loading state 
+    const form = document.getElementById('edit-product-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const spinner = document.getElementById('btn-spinner');
+    const btnText = document.getElementById('btn-text');
+    form?.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Saving...';
+    });
   });
 </script>
-{% endblock content %}
+{% endblock %}
