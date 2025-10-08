@@ -1,0 +1,26 @@
+{% load static %}
+
+<!-- Toast Component -->
+<div 
+    id="custom-toast"
+    class="fixed bottom-6 right-6 w-80 max-w-sm bg-white shadow-lg rounded-lg border border-gray-200 p-4 flex items-start gap-4 opacity-0 pointer-events-none transform translate-y-10 transition-all duration-300 z-50"
+>
+    <!-- Icon -->
+    <div id="toast-icon-container" class="text-2xl mt-1 leading-none text-gray-600">
+        ℹ️
+    </div>
+
+    <!-- Text content -->
+    <div class="flex-1">
+        <h3 id="custom-toast-title" class="font-semibold text-base mb-0.5">Title</h3>
+        <p id="custom-toast-message" class="text-sm text-gray-600">Message goes here.</p>
+    </div>
+
+    <!-- Close button -->
+    <button onclick="hideCustomToast()" class="text-gray-400 hover:text-gray-700 transition-colors">
+        &times;
+    </button>
+</div>
+
+<!-- Script -->
+<script src="{% static 'js/custom_toast.js' %}"></script>

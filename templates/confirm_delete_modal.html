@@ -1,0 +1,41 @@
+<!-- Confirm Delete Modal -->
+<div id="confirmDeleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="relative bg-white dark:bg-gray-900 w-11/12 sm:w-[400px] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+
+    <!-- Header Icon -->
+    <div class="flex items-center justify-center pt-6">
+      <div class="bg-red-100 dark:bg-red-900 p-3 rounded-full">
+        <svg class="h-6 w-6 text-red-600 dark:text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Title & Description -->
+    <div class="text-center px-6 py-4">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Delete Product</h2>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        Are you absolutely sure you want to delete this product? This action cannot be undone.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-3 px-6 py-5 border-t border-gray-100 dark:border-gray-800">
+      <button
+        type="button"
+        class="w-full px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        onclick="window.closeDeleteModal()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        id="confirmDeleteBtn"
+        class="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md transition"
+      >
+        Delete
+      </button>
+    </div>
+
+  </div>
+</div>

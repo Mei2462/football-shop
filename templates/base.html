@@ -2,14 +2,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% block meta %} {% endblock meta %}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'css/global.css' %}"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {% block meta %}{% endblock meta %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- DOMPurify untuk XSS defense di frontend -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+  <link rel="stylesheet" href="{% static 'css/global.css' %}"/>
+  <script>
+    //global info untuk JS
+    window.CURRENT_USER_ID = "{{ user.id|default:'' }}";
+    window.URLS = {
+      home: "{% url 'main:show_main' %}",
+      loginPage: "{% url 'main:login' %}",
+    };
+    //endpoint API (AJAX)
+    window.ENDPOINTS = {
+      productsList: "{% url 'main:products_json' %}",
+      productDetailTpl: "{% url 'main:product_json_by_id' '00000000-0000-0000-0000-000000000000' %}",
+      createProduct: "{% url 'main:product_create_ajax' %}",
+      updateProductTpl: "{% url 'main:product_update_ajax' '00000000-0000-0000-0000-000000000000' %}",
+      deleteProductTpl: "{% url 'main:product_delete_ajax' '00000000-0000-0000-0000-000000000000' %}",
+      login: "{% url 'main:login_ajax' %}",
+      register: "{% url 'main:register_ajax' %}",
+      logout: "{% url 'main:logout_ajax' %}",
+      showProductTpl: "{% url 'main:show_product' '00000000-0000-0000-0000-000000000000' %}",
+    };
+  </script>
 </head>
+<script>
+  window.URLS = Object.assign({}, window.URLS, {
+    home: "{% url 'main:show_main' %}",
+    loginPage: "{% url 'main:login' %}",
+  });
+  window.ENDPOINTS = Object.assign({}, window.ENDPOINTS, {
+    login: "{% url 'main:login_ajax' %}",
+    register: "{% url 'main:register_ajax' %}",
+    logout: "{% url 'main:logout_ajax' %}",
+  });
+</script>
 
+{% include 'toast.html' %}
+<script src="{% static 'js/custom-toast.js' %}"></script>
+
+<!-- FLASH TOAST setelah redirect -->
+<script>
+  (function () {
+    try {
+      const raw = sessionStorage.getItem('__flash_toast__');
+      if (!raw) return;
+      sessionStorage.removeItem('__flash_toast__');
+      const conf = JSON.parse(raw);
+      if (typeof window.showToast === 'function') {
+        window.showToast(conf.title || '', conf.message || '', conf.type || 'info', conf.duration || 1800);
+      }
+    } catch (_) {}
+  })();
+</script>
+
+<!-- auth (AJAX login/register/logout + toast) -->
+<script src="{% static 'js/auth.js' %}"></script>
 <body>
-    {% block content %} {% endblock content %}
+  {% block content %}{% endblock content %}
+
+  {% include 'toast.html' %}
+  {% include 'modal.html' %}
+  {% include 'confirm_delete_modal.html' %}
+
+  <script src="{% static 'js/csrf.js' %}"></script>
+  <script type="module" src="{% static 'js/products.js' %}"></script>
+  <script src="{% static 'js/auth.js' %}"></script>
 </body>
 </html>

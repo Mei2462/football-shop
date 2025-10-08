@@ -30,7 +30,7 @@
               {{ npm|default:"2406361662" }} - {{ class|default:"PBP C" }}
             </div>
           </div>
-          <a href="{% url 'main:logout' %}" class="text-red-600 hover:text-red-700 font-medium transition-colors">
+          <a id="logout-link" href="{% url 'main:logout' %}" class="text-red-600 hover:text-red-700 font-medium transition-colors">
             Logout
           </a>
         {% else %}

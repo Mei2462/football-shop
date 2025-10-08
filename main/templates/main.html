@@ -7,59 +7,75 @@
 
 {% block content %}
 {% include 'navbar.html' %}
+
+<!-- Toast -->
+<div id="custom-toast" class="fixed bottom-6 right-6 px-6 py-4 rounded-lg shadow-lg border bg-white flex items-center gap-4 opacity-0 translate-y-10 transition-all pointer-events-none z-50 text-gray-800">
+  <span id="toast-icon-container" class="text-2xl leading-none">ℹ️</span>
+  <div class="flex-1">
+    <h3 id="custom-toast-title" class="font-semibold text-base mb-0.5">Title</h3>
+    <p id="custom-toast-message" class="text-sm text-gray-600">Message goes here.</p>
+  </div>
+  <button onclick="hideCustomToast()" class="text-gray-400 hover:text-gray-700 transition-colors">&times;</button>
+</div>
+
 <div class="bg-gray-50 w-full pt-16 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Header Section -->
-    <div class="mb-8">
+    <!-- Header -->
+    <div class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Trendy Football Product</h1>
       <p class="text-gray-600">Welcome to Your Best Football Online Shop!</p>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-      <div class="flex space-x-3">
-        <a href="?filter=all" class="{% if request.GET.filter == 'all' or not request.GET.filter %} bg-green-600 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
-          All Products
-        </a>
-        <a href="?filter=my" class="{% if request.GET.filter == 'my' %} bg-green-600 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-green-600 hover:text-white">
-          My Products
-        </a>
+    <!-- Button to open modal -->
+    <button id="create-btn"
+      class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors mb-4">
+      Create Product by AJAX
+    </button>
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div class="flex gap-2">
+        <button id="filter-all" class="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700">All Products</button>
+        <button id="filter-my" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium hover:bg-green-600 hover:text-white">My Products</button>
       </div>
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <a href="{% url 'main:create_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-          + Add Product
-        </a>
+      <div class="flex gap-2">
+        <button id="refresh-btn" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-md font-medium hover:bg-gray-50">Refresh</button>
       </div>
     </div>
 
-    <!-- Last Login -->
     {% if user.is_authenticated %}
-      <div class="text-sm text-gray-500 mb-6">
-        Last login: {{ last_login }}
-      </div>
+      <div class="text-sm text-gray-500 mb-6">Last login: {{ last_login }}</div>
     {% endif %}
 
-    <!-- Product Grid or Empty State -->
-    {% if not product_list %}
-      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
-        <div class="w-32 h-32 mx-auto mb-4">
-          <img src="{% static 'image/no-product.png' %}" alt="No products available" class="w-full h-full object-contain">
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-        <p class="text-gray-500 mb-6">Be the first to add a product to your football shop.</p>
-        <a href="{% url 'main:create_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+    <!-- Loading -->
+    <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <svg class="animate-spin h-8 w-8 text-green-600 inline-block" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+      </svg>
+      <p class="text-gray-600 mt-3">Loading products...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="bg-white rounded-lg border border-red-200 p-6 text-center text-red-700 hidden">
+      Failed to load products.
+    </div>
+
+    <!-- Product Grid -->
+    <div id="grid" class="hidden"></div>
+
+    <!-- Empty State -->
+    <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+      <div class="w-32 h-32 mx-auto mb-4">
+        <img src="{% static 'image/no-product.png' %}" alt="No products available" class="w-full h-full object-contain">
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
+      <p class="text-gray-500 mb-6">Be the first to add a product to your football shop.</p>
+      <a href="{% url 'main:create_product' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
           + Add Product
-        </a>
-      </div>
-    {% else %}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for product in product_list %}
-          {% include 'card_product.html' with product=product %}
-        {% endfor %}
-      </div>
-    {% endif %}
-
+      </a>
+    </div>
   </div>
 </div>
 {% endblock content %}
