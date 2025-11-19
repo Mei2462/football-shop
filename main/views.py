@@ -1,9 +1,9 @@
-from urllib import request
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,6 +12,9 @@ from django.utils.html import strip_tags
 import datetime
 from main.forms import ProductForm
 from main.models import Product
+from urllib.parse import unquote
+import requests
+import json
 
 # ---------- PAGES ----------
 @login_required(login_url='/login')
@@ -56,7 +59,8 @@ def products_json(request):
             'category': p.category,
             'is_featured': p.is_featured,
             'user_id': p.user_id,
-            'created_at': None,  
+            'username': p.user.username if p.user_id else None,
+            'created_at': None,
         } for p in products
     ]
     return JsonResponse(data, safe=False)
@@ -209,3 +213,78 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+# ---------- Method for Flutter ----------
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Decode URL (pengganti urlunquote)
+        image_url = unquote(image_url)
+
+        # Validasi skema URL
+        if not image_url.startswith(('http://', 'https://')):
+            return HttpResponse('Invalid URL scheme', status=400)
+
+        # Fetch image
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+
+        # Tentukan content type
+        content_type = response.headers.get('Content-Type', 'image/jpeg')
+
+        if not content_type.startswith('image/'):
+            return HttpResponse('URL is not an image', status=400)
+
+        return HttpResponse(response.content, content_type=content_type)
+
+    except requests.exceptions.Timeout:
+        return HttpResponse('Image request timed out', status=504)
+
+    except requests.exceptions.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+
+
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            name = strip_tags(data.get("name", ""))
+            description = strip_tags(data.get("description", ""))
+            category = data.get("category", "")
+            thumbnail = data.get("thumbnail", "")
+            is_featured = data.get("is_featured", False)
+            price = data.get("price", "0")
+            stock = data.get("stock", "0")
+
+            # Convert price and stock to numeric
+            try:
+                price = float(price)
+                stock = int(stock)
+            except ValueError:
+                return JsonResponse({"status": "error", "message": "Invalid price or stock format"}, status=400)
+
+            user = request.user if request.user.is_authenticated else None
+
+            new_product = Product(
+                name=name,
+                price=price,
+                stock=stock,
+                description=description,
+                category=category,
+                thumbnail=thumbnail,
+                is_featured=is_featured,
+                user=user
+            )
+            new_product.save()
+
+            return JsonResponse({"status": "success"}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
